@@ -1,0 +1,125 @@
+"use strict";
+var logger = require('../utils/logger.js')('driveModel');
+var utils = require("../utils/utils");
+var acs800 = require("./dr_acs800.js");
+var vacon_nx = require("./dr_vacon_nx.js");
+
+var drive = acs800;
+
+var isFast = false;
+
+var state = 0; // 0 stopped; 1 running; 2 warning; 3 faulted
+var mCount = 0,
+    changeState_min = 5,
+    nextState = Date.now() + changeState_min * 60 * 1000;
+
+utils.startPeriodicTasks(everySecond, everyMinute, null);
+
+function everySecond(){
+    if (isFast) checkForStateChange();
+    if (state === 1 || state === 2){
+        drive.updateValues(true);
+    }else{
+        drive.updateValues(false);
+    }
+}
+
+function everyMinute(){
+    if (!isFast) checkForStateChange();
+}
+
+function checkForStateChange(){
+    if (mCount >= changeState_min){
+        mCount = 0;
+        changeState_min = utils.getRandomInt(60, 5 * 60);
+        nextState = Date.now() + changeState_min * 60 * 1000;
+
+        logger.info("Next change state will occur in " + changeState_min + ((isFast)? " seconds" : " minutes"), "everySecond");
+
+        if (state === 0) runDrive();
+        else if (state === 1) warnDrive();
+        else if (state === 2) faultDrive();
+        else if (state === 3) stopDrive();
+    }
+    mCount++;
+}
+
+function runDrive(){
+    logger.info("Starting drive", "runDrive");
+    state = 1;
+    drive.setRun();
+}
+
+function warnDrive(){
+    logger.info("Drive Warning", "warnDrive");
+    state = 2;
+    drive.setWarning();
+}
+
+function faultDrive(){
+    logger.info("Drive Fault", "faultDrive");
+    state = 3;
+    drive.setFault();
+}
+
+function stopDrive(){
+    logger.info("Stopping drive", "stopDrive");
+    state = 0;
+    drive.setStop();
+}
+
+function getValue(address){
+    for (var i = 0; i < drive.parameters.length; i++){
+        // if (address === 117) return new Date().getMinutes() * utils.getRandomInt(1, 3);
+        if (address === drive.parameters[i].add){
+            return drive.parameters[i].value;
+        }
+    }
+    return 0;
+}
+
+
+// ----------------------------------------- PUBLIC -----------------------------------------
+// ---- GETTERS
+function _getBuffers(from, to){
+    var bufArr = [];
+    for (var i = from; i <= to; i++){
+        bufArr.push(utils.int16ToBytes(getValue(i)));
+    }
+    return bufArr;
+}
+function _getStatus(){
+    var a = {
+        name: drive.name,
+        params:drive.parameters
+    };
+    a.state = state;
+    a.nextState = new Date(nextState);
+    a.next_min = changeState_min - mCount;
+    return a;
+}
+
+// ---- SETTERS
+function _setFaster(_isFaster){
+    isFast = _isFaster;
+}
+function _setDrive(driveType){
+    switch(driveType) {
+        case "acs800":
+            drive = acs800;
+            break;
+        case "vacon_nx":
+            drive = vacon_nx;
+            break;
+        default:
+            drive = acs800;
+    }
+}
+
+module.exports = {
+    getBuffers: _getBuffers,
+    getStatus: _getStatus,
+
+    setFaster:_setFaster,
+    setDrive: _setDrive
+};
