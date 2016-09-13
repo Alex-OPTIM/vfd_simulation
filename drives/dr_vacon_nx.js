@@ -4,50 +4,43 @@ var utils = require("../utils/utils");
 var bit = utils.bitUtils();
 
 var parameters = [
-    {"add":300,"id":"mcw","value":1141},
-    {"add":301,"id":"msw","value":64},
-    {"add":302,"id":"asw","value":0},
-    {"add":116,"id":"diw","value":0},
-    {"add":120,"id":"dow","value":0},
-    {"add":101,"id":"spd","value":0},
-    {"add":103,"id":"cnt","value":0},
-    {"add":104,"id":"trq","value":0},
-    {"add":105,"id":"pwr","value":0},
-    {"add":106,"id":"dc_v","value":0},
-    {"add":108,"id":"out_v","value":0},
-    {"add":109,"id":"d_temp","value":0},
-    {"add":110,"id":"ref1","value":0},
-    {"add":111,"id":"ref2","value":0},
-    {"add":117,"id":"ai1","value":0},
-    {"add":118,"id":"ai2","value":0},
-    {"add":119,"id":"ai3","value":0},
-    {"add":304,"id":"f_word_1","value":0},
-    {"add":305,"id":"f_word_2","value":0},
-    {"add":307,"id":"w_word_1","value":0},
-    {"add":308,"id":"w_word_2","value":0},
-    {"add":314,"id":"f_word_4","value":0},
-    {"add":315,"id":"w_word_4","value":0},
-    {"add":316,"id":"f_word_5","value":0},
-    {"add":317,"id":"w_word_5","value":0},
-    {"add":330,"id":"w_word_6","value":0},
-    {"add":332,"id":"f_word_6","value":0}
+    {"add":2001,"id":"mcw","value":1141},
+    {"add":2101,"id":"msw","value":64},
+    // {"add":0,"id":"asw","value":0},
+    {"add":15,"id":"diw","value":0},
+    {"add":17,"id":"dow","value":0},
+    {"add":2,"id":"spd","value":0},
+    {"add":3,"id":"cnt","value":0},
+    {"add":4,"id":"trq","value":0},
+    {"add":5,"id":"pwr","value":0},
+    {"add":7,"id":"dc_v","value":0},
+    {"add":6,"id":"out_v","value":0},
+    {"add":8,"id":"d_temp","value":0},
+    {"add":2003,"id":"ref1","value":0},
+    {"add":18,"id":"ref2","value":0},
+    {"add":13,"id":"ai1","value":0},
+    {"add":14,"id":"ai2","value":0},
+    // {"add":0,"id":"ai3","value":0},
+    {"add":1172,"id":"f_word_1","value":0},
+    {"add":1173,"id":"f_word_2","value":0},
+    {"add":1174,"id":"w_word_1","value":0}
 ];
 var faultWords = [
-    {"add":304,"id":"f_word_1","bits":[0,1,2,3,4,5,6,7,8,9]},
-    {"add":305,"id":"f_word_2","bits":[0,1,2,4,5,6,7,8,9,10,11,12,13,14,15]}
+    {"add":1172,"id":"f_word_1","bits":[0,1,2,3,4,5,6,7,8,11,12,13,14,15]},
+    {"add":1173,"id":"f_word_2","bits":[2,6,9,10,14]}
 ];
 var warnWords = [
-    {"add":307,"id":"w_word_1","bits":[0,2,3,4,5,6,12,14]}
+    {"add":1174,"id":"w_word_1","bits":[0,1,2,3,4,9,14,15]}
 ];
 var nom  = {
     msw: {value: {run: 0, stop:0}, range: 0},
     spd: {value: {run: 1492, stop: 0}, range: 2},
-    cnt: {value: {run: 2500, stop: 0}, range: 25},
-    trq: {value: {run: 3100, stop: 0}, range: 31},
-    pwr: {value: {run: 180, stop: 0}, range: 2},
+    cnt: {value: {run: 2100, stop: 0}, range: 25},
+    trq: {value: {run: 2600, stop: 0}, range: 31},
+    pwr: {value: {run: 110, stop: 0}, range: 2},
     dc_v: {value: {run: 592, stop: 582}, range: 2},
     out_v: {value: {run: 365, stop: 0}, range: 3},
-    d_temp: {value: {run: 254, stop: 210}, range: 3}
+    d_temp: {value: {run: 364, stop: 250}, range: 3}
 };
 
 var msw = getParam("msw"),

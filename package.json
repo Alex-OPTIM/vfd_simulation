@@ -1,9 +1,12 @@
 {
   "name": "vfd_simulation",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Node.js application simulates a presence of the variable frequency drive on the network.",
   "main": "server.js",
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alex-OPTIM/vfd_simulation.git"
+  },
   "author": "Alex @ OPTIM Controls",
   "dependencies": {
     "modbus-tcp": "^0.4.5",
