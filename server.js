@@ -10,6 +10,10 @@ logger.setDebug(DEBUG);
 const mPort = 1502; // could be 502 on Windows machine
 const httpPort = 8080;
 
+
+var simulatorType = process.argv[2];
+drive.setDrive(simulatorType);
+
 modbusServer(mPort);
 
 /**
@@ -20,7 +24,7 @@ modbusServer(mPort);
  * /SET/debug/faster
  * /SET/debug/logger
  */
-var server = restify.createServer({name:"Drive Simulator"});
+var server = restify.createServer({name:simulatorType || "Drive Simulator"});
 server.get('/GET/status/', function getStatus(req, res, next) {
   res.send(drive.getStatus());
   next();

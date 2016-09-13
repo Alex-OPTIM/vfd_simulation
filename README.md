@@ -13,7 +13,7 @@ Example to use on Debian OS with Node.js v6.5.0:
     cd ~/vfd_simulation
     npm install
     sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 502 -j REDIRECT --to-port 1502
-    node server.js
+    node server.js acs800 //or vacon_nx
 
 To stop process:
 CTRL+C

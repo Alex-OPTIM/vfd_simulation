@@ -1,0 +1,8 @@
+{
+  "name"            : "acs800",
+  "script"          : "~/vfd_simulation/server.js acs800",
+  "log_file"        : "pm2.log",
+  "error_file"      : "/dev/null",
+  "out_file"        : "/dev/null",
+  "merge_logs"      : true
+}
