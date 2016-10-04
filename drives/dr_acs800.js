@@ -5,7 +5,7 @@ var bit = utils.bitUtils();
 
 var parameters = [
     {"add":300,"id":"mcw","value":1141},
-    {"add":301,"id":"msw","value":64},
+    {"add":301,"id":"msw","value":0},
     {"add":302,"id":"asw","value":0},
     {"add":116,"id":"diw","value":0},
     {"add":120,"id":"dow","value":0},

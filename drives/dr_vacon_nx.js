@@ -5,8 +5,8 @@ var bit = utils.bitUtils();
 
 var parameters = [
     {"add":2001,"id":"mcw","value":1141},
-    {"add":2101,"id":"msw","value":64},
-    // {"add":0,"id":"asw","value":0},
+    {"add":43,"id":"msw","value":0},
+    {"add":1601,"id":"asw","value":0},
     {"add":15,"id":"diw","value":0},
     {"add":17,"id":"dow","value":0},
     {"add":2,"id":"spd","value":0},
@@ -16,11 +16,11 @@ var parameters = [
     {"add":7,"id":"dc_v","value":0},
     {"add":6,"id":"out_v","value":0},
     {"add":8,"id":"d_temp","value":0},
-    {"add":2003,"id":"ref1","value":0},
+    {"add":25,"id":"ref1","value":0},
     {"add":18,"id":"ref2","value":0},
     {"add":13,"id":"ai1","value":0},
     {"add":14,"id":"ai2","value":0},
-    // {"add":0,"id":"ai3","value":0},
+    {"add":16,"id":"ai3","value":0},
     {"add":1172,"id":"f_word_1","value":0},
     {"add":1173,"id":"f_word_2","value":0},
     {"add":1174,"id":"w_word_1","value":0}
@@ -34,13 +34,13 @@ var warnWords = [
 ];
 var nom  = {
     msw: {value: {run: 0, stop:0}, range: 0},
-    spd: {value: {run: 1492, stop: 0}, range: 2},
-    cnt: {value: {run: 2100, stop: 0}, range: 25},
-    trq: {value: {run: 2600, stop: 0}, range: 31},
-    pwr: {value: {run: 110, stop: 0}, range: 2},
-    dc_v: {value: {run: 592, stop: 582}, range: 2},
-    out_v: {value: {run: 365, stop: 0}, range: 3},
-    d_temp: {value: {run: 364, stop: 250}, range: 3}
+    spd: {value: {run:    1492  * 1, stop: 0}, range: 2},
+    cnt: {value: {run:    210   * 10, stop: 0}, range: 25},
+    trq: {value: {run:    26    * 10, stop: 0}, range: 31},
+    pwr: {value: {run:    11    * 10, stop: 0}, range: 2},
+    dc_v: {value: {run:   592   * 1, stop: 582}, range: 2},
+    out_v: {value: {run:  36    * 10, stop: 0}, range: 3},
+    d_temp: {value: {run: 36.4  * 10, stop: 250}, range: 3}
 };
 
 var msw = getParam("msw"),

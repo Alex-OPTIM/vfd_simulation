@@ -1,6 +1,7 @@
 {
-  "name"            : "vacon_nx",
-  "script"          : "~/vfd_simulation/server.js vacon_nx",
+  "name"            : "simulation",
+  "script"          : "server.js",
+  "args"            : ["vacon_nx"],
   "log_file"        : "pm2.log",
   "error_file"      : "/dev/null",
   "out_file"        : "/dev/null",

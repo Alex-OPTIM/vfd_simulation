@@ -89,14 +89,13 @@ function _getBuffers(from, to){
     return bufArr;
 }
 function _getStatus(){
-    var a = {
+    return {
         name: drive.name,
+        state: state,
+        nextState: new Date(nextState),
+        next_min: changeState_min - mCount,
         params:drive.parameters
-    };
-    a.state = state;
-    a.nextState = new Date(nextState);
-    a.next_min = changeState_min - mCount;
-    return a;
+    }
 }
 
 // ---- SETTERS
