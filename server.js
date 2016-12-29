@@ -54,6 +54,17 @@ server.get('/SET/logger/:value', function setLogger(req, res, next) {
   next();
 });
 
+server.get('/SET/param/:paramId/:value', function setParValue(req, res, next) {
+    var parId = parseInt(req.params.paramId);
+    var value  = parseInt(req.params.value);
+    if (parId && value){
+        logger.info("Parameter " + parId + " set to " + value, "/SET/param/:paramId/:value");
+        res.send({done: drive.setParamValue(parId, value), paramId: parId, value: value});
+    }else{
+        res.send({done: false});
+    }
+    next();
+});
 
 
 server.listen(httpPort, function() {

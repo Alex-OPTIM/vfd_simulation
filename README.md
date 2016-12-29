@@ -27,6 +27,8 @@ GET /SET/drive/:driveType  - acs800, vacon_nx
 GET /SET/debug/faster
 GET /SET/debug/logger
 
+GET /SET/param/:paramId/:value
+
 
 ## Set permanent port forwarding ##
 Run in terminal

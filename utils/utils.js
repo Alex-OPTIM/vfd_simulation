@@ -13,7 +13,7 @@ utils.getRandomBase = function(base, range) {
     return base - range + utils.getRandomInt(1, 2 * range);
 };
 
-utils.toSInt16 = function(x){
+utils.toSInt16 = function b(x){
     if (x<=65535){return(x>32767)?(x-65536):x}
     return x
 };
@@ -70,6 +70,29 @@ utils.int16ToBytes = function(number) {
         if (number >= -32768) buf.writeUInt16BE((65536 + number), 0);
     }
     return buf
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+utils.isShort = function(value){
+    // USHRT_MAX = 65535
+    // SHRT_MAX = 32767
+    // SHRT_MIN = -32768
+    return (value > 0 && value <= 65535) || (value < 0 && value >= -32768);
+};
+
+utils.toUnsignedShort = function a(value){
+    // USHRT_MAX = 65535
+    // SHRT_MAX = 32767
+    // SHRT_MIN = -32768
+    if (value > 0 && value <= 65535){
+        return value
+    } else if (value < 0 && value >= -32768){
+        return value + 65535 + 1
+    }
+    return 0
 };
 
 module.exports = utils;

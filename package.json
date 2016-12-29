@@ -1,6 +1,6 @@
 {
   "name": "vfd_simulation",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Node.js application simulates a presence of the variable frequency drive on the network.",
   "main": "server.js",
   "repository": {

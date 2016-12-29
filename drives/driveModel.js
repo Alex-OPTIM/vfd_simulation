@@ -78,6 +78,21 @@ function getValue(address){
     return 0;
 }
 
+function setDriveParameter(parId, value){
+    for (var i = 0; i < drive.parameters.length; i++){
+        if (drive.parameters[i].add === parId){
+            drive.parameters[i].value = value;
+            break
+        } else if (i >= drive.parameters.length - 1){
+            var obj = {
+                add: parId,
+                id: "id_" + parId,
+                value: value
+            };
+            drive.parameters.push((obj))
+        }
+    }
+}
 
 // ----------------------------------------- PUBLIC -----------------------------------------
 // ---- GETTERS
@@ -115,10 +130,27 @@ function _setDrive(driveType){
     }
 }
 
+/**
+ * @param {number} paramId
+ * @param {number} value
+ * @returns {boolean}
+ * @private
+ */
+function _setParamValue(paramId, value){
+    var pId = parseInt(paramId, 10);
+    var val = parseInt(value, 10);
+    if (pId > 0 && utils.isShort(val)){
+        setDriveParameter(paramId, utils.toUnsignedShort(val));
+        return true;
+    }
+    return false;
+}
+
 module.exports = {
     getBuffers: _getBuffers,
     getStatus: _getStatus,
 
     setFaster:_setFaster,
-    setDrive: _setDrive
+    setDrive: _setDrive,
+    setParamValue: _setParamValue
 };
