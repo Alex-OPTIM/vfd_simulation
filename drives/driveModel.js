@@ -9,9 +9,13 @@ var drive = acs800;
 var isFast = false;
 
 var state = 0; // 0 stopped; 1 running; 2 warning; 3 faulted
-var mCount = 0,
-    changeState_min = 5,
-    nextState = Date.now() + changeState_min * 60 * 1000;
+var minuteCount = 0,
+    changeState_min = 5, // 5 minute
+    nextState = Date.now() + changeState_min * 60 * 1000; // initial change state in 5 minutes
+
+// state changes randomly within the low limit (LL) and high limit (HL) period
+const RANDOM_STATE_CHANGE_LL_min = 12 * 60;
+const RANDOM_STATE_CHANGE_HL_min = 24 * 60;
 
 utils.startPeriodicTasks(everySecond, everyMinute, null);
 
@@ -29,9 +33,9 @@ function everyMinute(){
 }
 
 function checkForStateChange(){
-    if (mCount >= changeState_min){
-        mCount = 0;
-        changeState_min = utils.getRandomInt(60, 5 * 60);
+    if (minuteCount >= changeState_min){
+        minuteCount = 0;
+        changeState_min = utils.getRandomInt(RANDOM_STATE_CHANGE_LL_min, RANDOM_STATE_CHANGE_HL_min);
         nextState = Date.now() + changeState_min * 60 * 1000;
 
         logger.info("Next change state will occur in " + changeState_min + ((isFast)? " seconds" : " minutes"), "everySecond");
@@ -41,7 +45,7 @@ function checkForStateChange(){
         else if (state === 2) faultDrive();
         else if (state === 3) stopDrive();
     }
-    mCount++;
+    minuteCount++;
 }
 
 function runDrive(){
@@ -108,7 +112,7 @@ function _getStatus(){
         name: drive.name,
         state: state,
         nextState: new Date(nextState),
-        next_min: changeState_min - mCount,
+        next_min: changeState_min - minuteCount,
         params:drive.parameters
     }
 }
