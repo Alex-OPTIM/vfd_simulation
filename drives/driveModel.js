@@ -3,6 +3,7 @@ var logger = require('../utils/logger.js')('driveModel');
 var utils = require("../utils/utils");
 var acs800 = require("./dr_acs800.js");
 var vacon_nx = require("./dr_vacon_nx.js");
+var version = require("../package.json").version;
 
 var drive = acs800;
 
@@ -109,11 +110,17 @@ function _getBuffers(from, to){
 }
 function _getStatus(){
     return {
+        simVersion: version,
         name: drive.name,
         state: state,
         nextState: new Date(nextState),
         next_min: changeState_min - minuteCount,
-        params:drive.parameters
+        params:drive.parameters,
+        system: {
+            nodeVersion: process.version,
+            uptime_sec: process.uptime(),
+            memory_B: process.memoryUsage()
+        }
     }
 }
 
