@@ -9,7 +9,8 @@ var drive = acs800;
 
 var isFast = false;
 
-var state = 0; // 0 stopped; 1 running; 2 warning; 3 faulted
+var driveState = new utils.DriveState();
+var state = driveState.STOPPED; // 0 stopped; 1 running; 2 warning; 3 faulted
 var minuteCount = 0,
     changeState_min = 5, // 5 minute
     nextState = Date.now() + changeState_min * 60 * 1000; // initial change state in 5 minutes
@@ -22,7 +23,7 @@ utils.startPeriodicTasks(everySecond, everyMinute, null);
 
 function everySecond(){
     if (isFast) checkForStateChange();
-    if (state === 1 || state === 2){
+    if (state === driveState.RUNNING || state === driveState.WARNING){
         drive.updateValues(true);
     }else{
         drive.updateValues(false);
@@ -41,42 +42,42 @@ function checkForStateChange(){
 
         logger.info("Next change state will occur in " + changeState_min + ((isFast)? " seconds" : " minutes"), "everySecond");
 
-        if (state === 0) runDrive();
-        else if (state === 1) warnDrive();
-        else if (state === 2) faultDrive();
-        else if (state === 3) stopDrive();
+        if (state === driveState.STOPPED) runDrive();
+        else if (state === driveState.RUNNING) warnDrive();
+        else if (state === driveState.WARNING) faultDrive();
+        else if (state === driveState.FAULTED) stopDrive();
     }
     minuteCount++;
 }
 
 function runDrive(){
     logger.info("Starting drive", "runDrive");
-    state = 1;
+    state = driveState.RUNNING;
     drive.setRun();
 }
 
 function warnDrive(){
     logger.info("Drive Warning", "warnDrive");
-    state = 2;
+    state = driveState.WARNING;
     drive.setWarning();
 }
 
 function faultDrive(){
     logger.info("Drive Fault", "faultDrive");
-    state = 3;
+    state = driveState.FAULTED;
     drive.setFault();
 }
 
 function stopDrive(){
     logger.info("Stopping drive", "stopDrive");
-    state = 0;
+    state = driveState.STOPPED;
     drive.setStop();
 }
 
 function getValue(address){
     for (var i = 0; i < drive.parameters.length; i++){
         // if (address === 117) return new Date().getMinutes() * utils.getRandomInt(1, 3);
-        if (address === drive.parameters[i].add){
+        if ((address + drive.modbusOffset) === drive.parameters[i].parId){
             return drive.parameters[i].value;
         }
     }
@@ -85,12 +86,12 @@ function getValue(address){
 
 function setDriveParameter(parId, value){
     for (var i = 0; i < drive.parameters.length; i++){
-        if (drive.parameters[i].add === parId){
+        if (drive.parameters[i].parId === parId){
             drive.parameters[i].value = value;
             break
         } else if (i >= drive.parameters.length - 1){
             var obj = {
-                add: parId,
+                parId: parId,
                 id: "id_" + parId,
                 value: value
             };
@@ -112,7 +113,7 @@ function _getStatus(){
     return {
         simVersion: version,
         name: drive.name,
-        state: state,
+        state: driveState.getString(state),
         nextState: new Date(nextState),
         next_min: changeState_min - minuteCount,
         params:drive.parameters,

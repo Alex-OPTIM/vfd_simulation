@@ -95,4 +95,19 @@ utils.toUnsignedShort = function a(value){
     return 0
 };
 
+/**
+ * @constructor
+ */
+utils.DriveState = function DriveState(){
+    this.STOPPED = 0;
+    this.RUNNING = 1;
+    this.WARNING = 2;
+    this.FAULTED = 3;
+};
+utils.DriveState.prototype.getString = function(number){
+    var self = this;
+    var state = Object.keys(this).filter(function(key) {return self[key] === number})[0];
+    return state || 'UNKNOWN';
+};
+
 module.exports = utils;

@@ -4,50 +4,40 @@ var utils = require("../utils/utils");
 var bit = utils.bitUtils();
 
 var parameters = [
-    {"add":300,"id":"mcw","value":1141},
-    {"add":301,"id":"msw","value":0},
-    {"add":302,"id":"asw","value":0},
-    {"add":116,"id":"diw","value":0},
-    {"add":120,"id":"dow","value":0},
-    {"add":101,"id":"spd","value":0},
-    {"add":103,"id":"cnt","value":0},
-    {"add":104,"id":"trq","value":0},
-    {"add":105,"id":"pwr","value":0},
-    {"add":106,"id":"dc_v","value":0},
-    {"add":108,"id":"out_v","value":0},
-    {"add":109,"id":"d_temp","value":0},
-    {"add":110,"id":"ref1","value":0},
-    {"add":111,"id":"ref2","value":0},
-    {"add":117,"id":"ai1","value":0},
-    {"add":118,"id":"ai2","value":0},
-    {"add":119,"id":"ai3","value":0},
-    {"add":304,"id":"f_word_1","value":0},
-    {"add":305,"id":"f_word_2","value":0},
-    {"add":307,"id":"w_word_1","value":0},
-    {"add":308,"id":"w_word_2","value":0},
-    {"add":314,"id":"f_word_4","value":0},
-    {"add":315,"id":"w_word_4","value":0},
-    {"add":316,"id":"f_word_5","value":0},
-    {"add":317,"id":"w_word_5","value":0},
-    {"add":330,"id":"w_word_6","value":0},
-    {"add":332,"id":"f_word_6","value":0},
-    {"add":2000,"id":"par2001","value":0},
-    {"add":2001,"id":"par2002","value":2200}
+    {"parId":301,"id":"mcw","value":1141},
+    {"parId":302,"id":"msw","value":0},
+    {"parId":303,"id":"asw","value":0},
+    {"parId":117,"id":"diw","value":0},
+    {"parId":121,"id":"dow","value":0},
+    {"parId":102,"id":"spd","value":0},
+    {"parId":104,"id":"cnt","value":0},
+    {"parId":105,"id":"trq","value":0},
+    {"parId":106,"id":"pwr","value":0},
+    {"parId":107,"id":"dc_v","value":0},
+    {"parId":109,"id":"out_v","value":0},
+    {"parId":110,"id":"d_temp","value":0},
+    {"parId":111,"id":"ref1","value":0},
+    {"parId":112,"id":"ref2","value":0},
+    {"parId":118,"id":"ai1","value":0},
+    {"parId":119,"id":"ai2","value":0},
+    {"parId":120,"id":"ai3","value":0},
+    {"parId":305,"id":"f_word_1","value":0,fWord:true,"bits":[0,1,2,3,4,5,6,7,8,9]},
+    {"parId":306,"id":"f_word_2","value":0,fWord:true,"bits":[0,1,2,4,5,6,7,8,9,10,11,12,13,14,15]},
+    {"parId":308,"id":"w_word_1","value":0,wWord:true,"bits":[0,2,3,4,5,6,12,14]},
+    {"parId":309,"id":"w_word_2","value":0,wWord:true,"bits":[1,4,7,8,9,10,13]},
+    {"parId":315,"id":"f_word_4","value":0,fWord:true,"bits":[0,1,2,3]},
+    {"parId":316,"id":"w_word_4","value":0,wWord:true,"bits":[0,1,2,3,4,5,13,14]},
+    {"parId":317,"id":"f_word_5","value":0,fWord:true,"bits":[0,1,2,3,4,5,6,78,9,10,11,13]},
+    {"parId":318,"id":"w_word_5","value":0,wWord:true,"bits":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,15]},
+    {"parId":331,"id":"w_word_6","value":0,wWord:true,"bits":[0,3]},
+    {"parId":333,"id":"f_word_6","value":0,fWord:true,"bits":[2]},
+    {"parId":2001,"id":"par2001","value":0},
+    {"parId":2002,"id":"par2002","value":2200}
 ];
-var faultWords = [
-    {"add":304,"id":"f_word_1","bits":[0,1,2,3,4,5,6,7,8,9]},
-    {"add":305,"id":"f_word_2","bits":[0,1,2,4,5,6,7,8,9,10,11,12,13,14,15]},
-    {"add":314,"id":"f_word_4","bits":[0,1,2,3]},
-    {"add":316,"id":"f_word_5","bits":[0,1,2,3,4,5,6,78,9,10,11,13]},
-    {"add":332,"id":"f_word_6","bits":[2]}
-];
-var warnWords = [
-    {"add":307,"id":"w_word_1","bits":[0,2,3,4,5,6,12,14]},
-    {"add":308,"id":"w_word_2","bits":[1,4,7,8,9,10,13]},
-    {"add":315,"id":"w_word_4","bits":[0,1,2,3,4,5,13,14]},
-    {"add":317,"id":"w_word_5","bits":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,15]},
-    {"add":330,"id":"w_word_6","bits":[0,3]}
-];
+
+var faultWords = parameters.filter(function(param) {return param.fWord});
+var warnWords = parameters.filter(function(param) {return param.wWord});
+
 var nom  = {
     msw: {value: {run: 0, stop:0}, range: 0},
     spd: {value: {run: 13500, stop: 0}, range: 20},
@@ -125,7 +115,7 @@ function _setStop(){
 module.exports = {
     name: "acs800",
     parameters: parameters,
-    
+    modbusOffset: 1,
     
     //setter
     updateValues : _updateValues,
