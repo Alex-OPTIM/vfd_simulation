@@ -1,0 +1,19 @@
+{
+  "apps":[{
+    "name"            : "acs800",
+    "script"          : "server.js",
+    "args"            : ["acs800",  "192.168.56.10"],
+    "log_file"        : "acs800.log",
+    "error_file"      : "/dev/null",
+    "out_file"        : "/dev/null",
+    "merge_logs"      : true
+  },{
+    "name"            : "vacon_nx",
+    "script"          : "server.js",
+    "args"            : ["vacon_nx", "192.168.56.11"],
+    "log_file"        : "vacon_nx.log",
+    "error_file"      : "/dev/null",
+    "out_file"        : "/dev/null",
+    "merge_logs"      : true
+  }]
+}

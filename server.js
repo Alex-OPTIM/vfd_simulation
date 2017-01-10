@@ -12,9 +12,11 @@ const httpPort = 8080;
 
 
 var simulatorType = process.argv[2];
+var hostIpAddress = process.argv[3] || undefined;
+console.log(hostIpAddress);
 drive.setDrive(simulatorType);
 
-modbusServer(mPort);
+modbusServer(simulatorType, mPort, hostIpAddress);
 
 /**
  * APIs:
@@ -67,6 +69,6 @@ server.get('/SET/param/:paramId/:value', function setParValue(req, res, next) {
 });
 
 
-server.listen(httpPort, function() {
-  console.log('%s listening at %s', server.name, server.url);
+server.listen(httpPort, hostIpAddress, function() {
+  console.log('%s listening HTTP at %s', server.name, server.url);
 });

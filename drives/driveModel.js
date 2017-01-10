@@ -129,6 +129,10 @@ function _getStatus(){
 function _setFaster(_isFaster){
     isFast = _isFaster;
 }
+/**
+ * @param {string} driveType
+ * @private
+ */
 function _setDrive(driveType){
     switch(driveType) {
         case "acs800":

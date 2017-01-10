@@ -14,8 +14,8 @@ Example to use on Debian OS with Node.js v6.5.0:
 `git clone https://github.com/Alex-OPTIM/vfd_simulation.git`
 `cd ~/vfd_simulation`
 `npm install`
-`sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 502 -j REDIRECT --to-port 1502`
-`node server.js acs800` //or vacon_nx
+`sudo iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 502 -j REDIRECT --to-port 1502`
+`node server.js acs800 ipAddress` //or vacon_nx and ipAddress is optional
 
 To stop process:
 CTRL+C
@@ -34,5 +34,5 @@ GET /SET/param/:paramId/:value
 Run in terminal
     `sudo nano /etc/rc.local`
 Add after last comment
-    `iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 502 -j REDIRECT --to-port 1502`
-Note: `eth1` could be `eth0`, depends on your system, check with command `sudo ifconfig`
+    `iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 502 -j REDIRECT --to-port 1502`
+Note: `eth+` is used for the wildcard of the interfaces, could be just `eth0`

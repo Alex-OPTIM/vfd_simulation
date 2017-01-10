@@ -4,9 +4,11 @@ var modbus = require("modbus-tcp");
 var drive = require("./drives/driveModel.js");
 
 /**
+ * @param {string} driveName
  * @param {number} mPort
+ * @param {string|undefined} mHost
  */
-module.exports = function(mPort) {
+module.exports = function(driveName, mPort, mHost) {
 
     var net = require('net');
     net.createServer(function(socket) {
@@ -29,8 +31,8 @@ module.exports = function(mPort) {
 
     }).on('error', function(err) {
         console.error(err);
-    }).listen(mPort, function() {
-        console.log("Listening Modbus TCP on port: " + mPort);
+    }).listen(mPort, mHost, function() {
+        console.log("Listening Modbus TCP for " + driveName + " on " + ((mHost)? mHost : "all_interfaces" ) + ":" + mPort);
     });
 
     return {}
