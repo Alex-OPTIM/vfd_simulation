@@ -1,172 +1,149 @@
 "use strict";
-var logger = require('../utils/logger.js')('driveModel');
+var logger = require('../utils/logger.js')('driveInterface');
 var utils = require("../utils/utils");
-var acs800 = require("./dr_acs800.js");
-var vacon_nx = require("./dr_vacon_nx.js");
-var version = require("../package.json").version;
+var bit = utils.bitUtils();
 
-var drive = acs800;
+/**
+ * 
+ * @param {{type:string, modbusOffset:number, parameters:[], nominal:{}}} driveObject
+ * @param {[]} additionalParams
+ * @constructor
+ */
+function Drive(driveObject, additionalParams){
+    additionalParams = (Array.isArray(additionalParams))? additionalParams : [];
 
-var isFast = false;
+    var parameters = driveObject.parameters.concat(additionalParams);
+    
+    var nom = driveObject.nominal;
+    
+    var faultWords = parameters.filter(function(param) {return param.fWord});
+    var warnWords = parameters.filter(function(param) {return param.wWord});
 
-var driveState = new utils.DriveState();
-var state = driveState.STOPPED; // 0 stopped; 1 running; 2 warning; 3 faulted
-var minuteCount = 0,
-    changeState_min = 5, // 5 minute
-    nextState = Date.now() + changeState_min * 60 * 1000; // initial change state in 5 minutes
+    var msw = getParam("msw"),
+        spd = getParam("spd"),
+        cnt = getParam("cnt"),
+        trq = getParam("trq"),
+        pwr = getParam("pwr"),
+        dc_v = getParam("dc_v"),
+        out_v = getParam("out_v"),
+        d_temp = getParam("d_temp"),
 
-// state changes randomly within the low limit (LL) and high limit (HL) period
-const RANDOM_STATE_CHANGE_LL_min = 12 * 60;
-const RANDOM_STATE_CHANGE_HL_min = 24 * 60;
+        wWord = getParam("w_word_1"),
+        fWord = getParam("f_word_1");
 
-utils.startPeriodicTasks(everySecond, everyMinute, null);
-
-function everySecond(){
-    if (isFast) checkForStateChange();
-    if (state === driveState.RUNNING || state === driveState.WARNING){
-        drive.updateValues(true);
-    }else{
-        drive.updateValues(false);
+    // ------------------------------------ PRIVATE ------------------------------------
+    function getParam(id){
+        for (var i = 0; i < parameters.length; i++){
+            if (parameters[i].id === id) return parameters[i]
+        }
+        return null;
     }
-}
+    function getRandomBit(words){
+        var wordIndex = utils.getRandomInt(0,words.length - 1);
+        var word = words[wordIndex];
+        logger.info(wordIndex + " " + JSON.stringify(word), "getRandomBit");
 
-function everyMinute(){
-    if (!isFast) checkForStateChange();
-}
+        var bitIndex = utils.getRandomInt(0,word.bits.length - 1);
+        var bit = word.bits[bitIndex];
+        logger.info(bitIndex + " " + bit, "getRandomBit");
 
-function checkForStateChange(){
-    if (minuteCount >= changeState_min){
-        minuteCount = 0;
-        changeState_min = utils.getRandomInt(RANDOM_STATE_CHANGE_LL_min, RANDOM_STATE_CHANGE_HL_min);
-        nextState = Date.now() + changeState_min * 60 * 1000;
-
-        logger.info("Next change state will occur in " + changeState_min + ((isFast)? " seconds" : " minutes"), "everySecond");
-
-        if (state === driveState.STOPPED) runDrive();
-        else if (state === driveState.RUNNING) warnDrive();
-        else if (state === driveState.WARNING) faultDrive();
-        else if (state === driveState.FAULTED) stopDrive();
+        return {id:word.id, bit:bit}
     }
-    minuteCount++;
-}
 
-function runDrive(){
-    logger.info("Starting drive", "runDrive");
-    state = driveState.RUNNING;
-    drive.setRun();
-}
+    // ------------------------------------ PUBLIC ------------------------------------
+    function _updateValues(isRunning){
 
-function warnDrive(){
-    logger.info("Drive Warning", "warnDrive");
-    state = driveState.WARNING;
-    drive.setWarning();
-}
-
-function faultDrive(){
-    logger.info("Drive Fault", "faultDrive");
-    state = driveState.FAULTED;
-    drive.setFault();
-}
-
-function stopDrive(){
-    logger.info("Stopping drive", "stopDrive");
-    state = driveState.STOPPED;
-    drive.setStop();
-}
-
-function getValue(address){
-    for (var i = 0; i < drive.parameters.length; i++){
-        // if (address === 117) return new Date().getMinutes() * utils.getRandomInt(1, 3);
-        if ((address + drive.modbusOffset) === drive.parameters[i].parId){
-            return drive.parameters[i].value;
+        var state = (isRunning) ? "run" : "stop";
+        if (isRunning){
+            spd.value = utils.getRandomBase(nom.spd.value[state], nom.spd.range);
+            cnt.value = utils.getRandomBase(nom.cnt.value[state], nom.cnt.range);
+            trq.value = utils.getRandomBase(nom.trq.value[state], nom.trq.range);
+            pwr.value = utils.getRandomBase(nom.pwr.value[state], nom.pwr.range);
+            dc_v.value = utils.getRandomBase(nom.dc_v.value[state], nom.dc_v.range);
+            out_v.value = utils.getRandomBase(nom.out_v.value[state], nom.out_v.range);
+            d_temp.value = utils.getRandomBase(nom.d_temp.value[state], nom.d_temp.range);
+        }else{
+            spd.value = nom.spd.value[state];
+            cnt.value = nom.cnt.value[state];
+            trq.value = nom.trq.value[state];
+            pwr.value = nom.pwr.value[state];
+            dc_v.value = nom.dc_v.value[state];
+            out_v.value = nom.out_v.value[state];
+            d_temp.value = nom.d_temp.value[state];
         }
     }
-    return 0;
-}
 
-function setDriveParameter(parId, value){
-    for (var i = 0; i < drive.parameters.length; i++){
-        if (drive.parameters[i].parId === parId){
-            drive.parameters[i].value = value;
-            break
-        } else if (i >= drive.parameters.length - 1){
+    function _setRun(){
+        msw.value = nom.msw.value.stop;
+        msw.value = bit.set(msw.value, 2); // RUN bit in STATUS WORD
+
+        wWord.value = 0;
+        fWord.value = 0;
+    }
+    function _setWarning(){
+        msw.value = bit.set(msw.value, 7); // WARNING bit in STATUS WORD
+
+        var word = getRandomBit(warnWords);
+        wWord = getParam(word.id);
+        wWord.value = bit.set(wWord.value, word.bit);
+    }
+    function _setFault(){
+        msw.value = nom.msw.value.stop;
+        msw.value = bit.set(msw.value, 3); // FAULT bit in STATUS WORD
+
+        var word = getRandomBit(faultWords);
+        fWord = getParam(word.id);
+        fWord.value = bit.set(fWord.value, word.bit);
+    }
+    function _setStop(){
+        msw.value = nom.msw.value.stop;
+
+        wWord.value = 0;
+        fWord.value = 0;
+    }
+
+    /**
+     * @param {number} parId
+     * @param {number} value
+     * @returns {Array}
+     * @private
+     */
+    function _setDriveParameter(parId, value){
+        var isPresent = false;
+        var addParams = [];
+        for (var i = 0; i < parameters.length; i++){
+            if (parameters[i].parId === parId){
+                parameters[i].value = value;
+                isPresent = true;
+            }
+            if (parameters[i].ap) addParams.push(parameters[i]);
+        }
+        if (!isPresent){
             var obj = {
                 parId: parId,
                 id: "id_" + parId,
-                value: value
+                value: value,
+                ap: 1 // additional parameter
             };
-            drive.parameters.push((obj))
+            parameters.push(obj);
+            addParams.push(obj);
         }
+        return addParams;
     }
-}
 
-// ----------------------------------------- PUBLIC -----------------------------------------
-// ---- GETTERS
-function _getBuffers(from, to){
-    var bufArr = [];
-    for (var i = from; i <= to; i++){
-        bufArr.push(utils.int16ToBytes(getValue(i)));
-    }
-    return bufArr;
-}
-function _getStatus(){
     return {
-        simVersion: version,
-        name: drive.name,
-        state: driveState.getString(state),
-        nextState: new Date(nextState),
-        next_min: changeState_min - minuteCount,
-        params:drive.parameters,
-        system: {
-            nodeVersion: process.version,
-            uptime_sec: process.uptime(),
-            memory_B: process.memoryUsage()
-        }
-    }
+        type: driveObject.type,
+        parameters: parameters,
+        modbusOffset: driveObject.modbusOffset || 0,
+
+        //setter
+        updateValues : _updateValues,
+        setRun: _setRun,
+        setWarning: _setWarning,
+        setFault: _setFault,
+        setStop: _setStop,
+        setDriveParameter: _setDriveParameter
+    };
 }
 
-// ---- SETTERS
-function _setFaster(_isFaster){
-    isFast = _isFaster;
-}
-/**
- * @param {string} driveType
- * @private
- */
-function _setDrive(driveType){
-    switch(driveType) {
-        case "acs800":
-            drive = acs800;
-            break;
-        case "vacon_nx":
-            drive = vacon_nx;
-            break;
-        default:
-            drive = acs800;
-    }
-}
-
-/**
- * @param {number} paramId
- * @param {number} value
- * @returns {boolean}
- * @private
- */
-function _setParamValue(paramId, value){
-    var pId = parseInt(paramId, 10);
-    var val = parseInt(value, 10);
-    if (pId > 0 && utils.isShort(val)){
-        setDriveParameter(paramId, utils.toUnsignedShort(val));
-        return true;
-    }
-    return false;
-}
-
-module.exports = {
-    getBuffers: _getBuffers,
-    getStatus: _getStatus,
-
-    setFaster:_setFaster,
-    setDrive: _setDrive,
-    setParamValue: _setParamValue
-};
+module.exports = Drive;

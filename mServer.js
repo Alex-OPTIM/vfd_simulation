@@ -1,7 +1,7 @@
 "use strict";
 var logger = require('./utils/logger.js')('mServer');
 var modbus = require("modbus-tcp");
-var drive = require("./drives/driveModel.js");
+var driveAdaptor = require("./drives/driveAdaptor.js");
 
 /**
  * @param {string} driveName
@@ -25,7 +25,7 @@ module.exports = function(driveName, mPort, mHost) {
         socket.pipe(mServer.reader());
 
         mServer.on("read-holding-registers", function(from, to, reply) {
-            var val = drive.getBuffers(from, to);
+            var val = driveAdaptor.getBuffers(from, to);
             return reply(null, val);
         });
 
