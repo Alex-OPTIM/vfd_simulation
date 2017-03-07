@@ -1,0 +1,9 @@
+{
+  "name"            : "atv320",
+  "script"          : "server.js",
+  "args"            : ["atv320"],
+  "log_file"        : "atv320.log",
+  "error_file"      : "/dev/null",
+  "out_file"        : "/dev/null",
+  "merge_logs"      : true
+}

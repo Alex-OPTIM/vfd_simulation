@@ -1,7 +1,7 @@
-"use strict";
-var logger = require('./utils/logger.js')('mServer');
-var modbus = require("modbus-tcp");
-var driveAdaptor = require("./drives/driveAdaptor.js");
+'use strict';
+const logger = require('./utils/logger.js')('mServer');
+const modbus = require('modbus-tcp');
+const driveAdaptor = require('./drives/driveAdaptor.js');
 
 /**
  * @param {string} driveName
@@ -10,13 +10,13 @@ var driveAdaptor = require("./drives/driveAdaptor.js");
  */
 module.exports = function(driveName, mPort, mHost) {
 
-    var net = require('net');
+    const net = require('net');
     net.createServer(function(socket) {
 
-        logger.info("New connection.");
+        logger.info('New connection.');
 
-        var mServer = new modbus.Server();
-        socket.on("error", function(err) {
+        const mServer = new modbus.Server();
+        socket.on('error', function(err) {
             console.error(err);
             socket.destroy();
         });
@@ -24,15 +24,15 @@ module.exports = function(driveName, mPort, mHost) {
         mServer.writer().pipe(socket);
         socket.pipe(mServer.reader());
 
-        mServer.on("read-holding-registers", function(from, to, reply) {
-            var val = driveAdaptor.getBuffers(from, to);
+        mServer.on('read-holding-registers', function(from, to, reply) {
+            const val = driveAdaptor.getBuffers(from, to);
             return reply(null, val);
         });
 
     }).on('error', function(err) {
         console.error(err);
     }).listen(mPort, mHost, function() {
-        console.log("Listening Modbus TCP for " + driveName + " on " + ((mHost)? mHost : "all_interfaces" ) + ":" + mPort);
+        console.log('Listening Modbus TCP for ' + driveName + ' on ' + ((mHost)? mHost : 'all_interfaces' ) + ':' + mPort);
     });
 
     return {}

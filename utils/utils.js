@@ -1,4 +1,4 @@
-var utils = {};
+const utils = {};
 
 // min and max inclusive
 utils.getRandomInt = function(min, max) {
@@ -24,11 +24,11 @@ utils.toSInt16 = function b(x){
  * @param {Function|null} everyHourTask
  * */
 utils.startPeriodicTasks = function(everySecondTask, everyMinuteTask, everyHourTask){
-    var prSec = 0, prMin = 0, prHour = 0;
+    let prSec = 0, prMin = 0, prHour = 0;
     setInterval(periodicTask,100);
     function periodicTask(){
-        var now_ms = new Date().getTime();
-        var nowSec = Math.round(now_ms/1000);
+        const now_ms = new Date().getTime();
+        const nowSec = Math.round(now_ms/1000);
         // Tasks repeated every second
         if (nowSec > prSec){prSec = nowSec; if (everySecondTask) everySecondTask(nowSec)}
         // Tasks repeated every minute
@@ -63,7 +63,7 @@ utils.bitUtils = function(){
 
 utils.int16ToBytes = function(number) {
     // we want to represent the input as a 8-bytes array
-    var buf = new Buffer([0, 0]);
+    const buf = new Buffer([0, 0]);
     if (number >= 0){
         if (number <= 65535) buf.writeUInt16BE(number, 0);
     }else{
@@ -105,8 +105,8 @@ utils.DriveState = function DriveState(){
     this.FAULTED = 3;
 };
 utils.DriveState.prototype.getString = function(number){
-    var self = this;
-    var state = Object.keys(this).filter(function(key) {return self[key] === number})[0];
+    const self = this;
+    const state = Object.keys(this).filter(function(key) {return self[key] === number})[0];
     return state || 'UNKNOWN';
 };
 

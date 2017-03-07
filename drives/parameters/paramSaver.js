@@ -1,8 +1,8 @@
-"use strict";
-var logger = require('../../utils/logger.js')('paramSaver');
-var fs = require("fs");
-const paramFolder = "./drives/parameters";
-const fnSuffix =  "_params.json";
+'use strict';
+const logger = require('../../utils/logger.js')('paramSaver');
+const fs = require('fs');
+const paramFolder = './drives/parameters';
+const fnSuffix =  '_params.json';
 
 
 // -------------------------------- PUBLIC -------------------------------- 
@@ -12,8 +12,8 @@ const fnSuffix =  "_params.json";
  * @param {function} cb
  */
 function _saveParam(driveType, parameters, cb){
-    var path = paramFolder + "/" + driveType + fnSuffix;
-    var paramString = JSON.stringify(parameters);
+    const path = paramFolder + '/' + driveType + fnSuffix;
+    const paramString = JSON.stringify(parameters);
 
     fs.writeFile(path, paramString, cb);
 }
@@ -25,10 +25,10 @@ function _saveParam(driveType, parameters, cb){
  * @private
  */
 function _listParams(driveType, cb){
-    var path = paramFolder + "/" + driveType + fnSuffix;
+    const path = paramFolder + '/' + driveType + fnSuffix;
     fs.readFile(path, function (err, data){
         if (err) return cb([]);
-        var params = [];
+        let params = [];
         try {
             params = JSON.parse(data);
         } catch (e) {

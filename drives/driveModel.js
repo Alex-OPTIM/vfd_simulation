@@ -1,7 +1,7 @@
-"use strict";
-var logger = require('../utils/logger.js')('driveInterface');
-var utils = require("../utils/utils");
-var bit = utils.bitUtils();
+'use strict';
+const logger = require('../utils/logger.js')('driveInterface');
+const utils = require('../utils/utils');
+const bit = utils.bitUtils();
 
 /**
  * 
@@ -12,40 +12,40 @@ var bit = utils.bitUtils();
 function Drive(driveObject, additionalParams){
     additionalParams = (Array.isArray(additionalParams))? additionalParams : [];
 
-    var parameters = driveObject.parameters.concat(additionalParams);
+    const parameters = driveObject.parameters.concat(additionalParams);
     
-    var nom = driveObject.nominal;
+    const nom = driveObject.nominal;
     
-    var faultWords = parameters.filter(function(param) {return param.fWord});
-    var warnWords = parameters.filter(function(param) {return param.wWord});
+    const faultWords = parameters.filter(function(param) {return param.fWord});
+    const warnWords = parameters.filter(function(param) {return param.wWord});
 
-    var msw = getParam("msw"),
-        spd = getParam("spd"),
-        cnt = getParam("cnt"),
-        trq = getParam("trq"),
-        pwr = getParam("pwr"),
-        dc_v = getParam("dc_v"),
-        out_v = getParam("out_v"),
-        d_temp = getParam("d_temp"),
+    const msw = getParam('msw'),
+        spd = getParam('spd'),
+        cnt = getParam('cnt'),
+        trq = getParam('trq'),
+        pwr = getParam('pwr'),
+        dc_v = getParam('dc_v'),
+        out_v = getParam('out_v'),
+        d_temp = getParam('d_temp');
 
-        wWord = getParam("w_word_1"),
-        fWord = getParam("f_word_1");
+    let wWord = getParam('w_word_1'),
+        fWord = getParam('f_word_1');
 
     // ------------------------------------ PRIVATE ------------------------------------
     function getParam(id){
-        for (var i = 0; i < parameters.length; i++){
+        for (let i = 0; i < parameters.length; i++){
             if (parameters[i].id === id) return parameters[i]
         }
         return null;
     }
     function getRandomBit(words){
-        var wordIndex = utils.getRandomInt(0,words.length - 1);
-        var word = words[wordIndex];
-        logger.info(wordIndex + " " + JSON.stringify(word), "getRandomBit");
+        const wordIndex = utils.getRandomInt(0,words.length - 1);
+        const word = words[wordIndex];
+        logger.info(wordIndex + ' ' + JSON.stringify(word), 'getRandomBit');
 
-        var bitIndex = utils.getRandomInt(0,word.bits.length - 1);
-        var bit = word.bits[bitIndex];
-        logger.info(bitIndex + " " + bit, "getRandomBit");
+        const bitIndex = utils.getRandomInt(0,word.bits.length - 1);
+        const bit = word.bits[bitIndex];
+        logger.info(bitIndex + ' ' + bit, 'getRandomBit');
 
         return {id:word.id, bit:bit}
     }
@@ -53,7 +53,7 @@ function Drive(driveObject, additionalParams){
     // ------------------------------------ PUBLIC ------------------------------------
     function _updateValues(isRunning){
 
-        var state = (isRunning) ? "run" : "stop";
+        const state = (isRunning) ? 'run' : 'stop';
         if (isRunning){
             spd.value = utils.getRandomBase(nom.spd.value[state], nom.spd.range);
             cnt.value = utils.getRandomBase(nom.cnt.value[state], nom.cnt.range);
@@ -81,9 +81,11 @@ function Drive(driveObject, additionalParams){
         fWord.value = 0;
     }
     function _setWarning(){
+        msw.value = nom.msw.value.stop;
+        msw.value = bit.set(msw.value, 2); // RUN bit in STATUS WORD - as in this simulation it WARNs when drive's running
         msw.value = bit.set(msw.value, 7); // WARNING bit in STATUS WORD
 
-        var word = getRandomBit(warnWords);
+        const word = getRandomBit(warnWords);
         wWord = getParam(word.id);
         wWord.value = bit.set(wWord.value, word.bit);
     }
@@ -91,7 +93,7 @@ function Drive(driveObject, additionalParams){
         msw.value = nom.msw.value.stop;
         msw.value = bit.set(msw.value, 3); // FAULT bit in STATUS WORD
 
-        var word = getRandomBit(faultWords);
+        const word = getRandomBit(faultWords);
         fWord = getParam(word.id);
         fWord.value = bit.set(fWord.value, word.bit);
     }
@@ -103,25 +105,25 @@ function Drive(driveObject, additionalParams){
     }
 
     /**
-     * @param {number} parId
+     * @param {number} paramId
      * @param {number} value
      * @returns {Array}
      * @private
      */
-    function _setDriveParameter(parId, value){
-        var isPresent = false;
-        var addParams = [];
-        for (var i = 0; i < parameters.length; i++){
-            if (parameters[i].parId === parId){
+    function _setDriveParameter(paramId, value){
+        let isPresent = false;
+        const addParams = [];
+        for (let i = 0; i < parameters.length; i++){
+            if (parameters[i].pId === paramId){
                 parameters[i].value = value;
                 isPresent = true;
             }
             if (parameters[i].ap) addParams.push(parameters[i]);
         }
         if (!isPresent){
-            var obj = {
-                parId: parId,
-                id: "id_" + parId,
+            const obj = {
+                pId: paramId,
+                id: 'id_' + paramId,
                 value: value,
                 ap: 1 // additional parameter
             };
