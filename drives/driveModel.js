@@ -50,6 +50,39 @@ function Drive(driveObject, additionalParams){
         return {id:word.id, bit:bit}
     }
 
+    /**
+     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, bits:[]}} word
+     * @returns {number}
+     * @private
+     */
+    function _getRandomBit(word) {
+        const bitIndex = utils.getRandomInt(0,word.bits.length - 1);
+        logger.info(bitIndex + ' ' + bit, 'getRandomBit');
+        return word.bits[bitIndex];
+    }
+
+    /**
+     * @param {[]} words
+     * @returns {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, bits:[], fCodes: string}}
+     * @private
+     */
+    function _getRandomWord(words){
+        const wordIndex = utils.getRandomInt(0,words.length - 1);
+        logger.info(wordIndex, 'getRandomBit');
+        return words[wordIndex];
+    }
+
+    /**
+     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, fCodes: string}} word
+     * @return {number}
+     * @private
+     */
+    function _getRandomFaultValue(word) {
+        const faultCodes = driveObject[word.fCodes];
+        const faultCodeIndex = utils.getRandomInt(0,faultCodes.length - 1);
+        return faultCodes[faultCodeIndex].value
+    }
+
     // ------------------------------------ PUBLIC ------------------------------------
     function _updateValues(isRunning){
 
@@ -93,9 +126,15 @@ function Drive(driveObject, additionalParams){
         msw.value = nom.msw.value.stop;
         msw.value = bit.set(msw.value, 3); // FAULT bit in STATUS WORD
 
-        const word = getRandomBit(faultWords);
-        fWord = getParam(word.id);
-        fWord.value = bit.set(fWord.value, word.bit);
+        // const word = getRandomBit(faultWords);
+        const word = _getRandomWord(faultWords);
+        if (word.hasFaultCodes) {
+            fWord.value = _getRandomFaultValue(word);
+        } else {
+            const randomBit = _getRandomBit(word);
+            fWord = getParam(word.id);
+            fWord.value = bit.set(fWord.value, randomBit);
+        }
     }
     function _setStop(){
         msw.value = nom.msw.value.stop;
