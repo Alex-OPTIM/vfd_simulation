@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="simulationApp" ng-controller="GeneralCtrl">
+<head>
+    <meta charset="UTF-8">
+    <title ng-bind="title">Loading...</title>
+    <style>
+        .space-left{
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div ng-hide="title">
+    <p>Loading...</p>
+</div>
+
+<div ng-show="title">
+    <h1>Drive Type {{status.type}}</h1>
+    <button ng-click="refreshStatus()">REFRESH</button>
+    <p>Current state: {{status.state}}, next state {{fromNow(nextStateOn)}} (set {{fromNow(stateChangedOn)}})</p>
+
+    <div>
+        <span>Set state: </span>
+        <button class="space-left" ng-repeat="stateId in driveStates" ng-click="setDriveState(stateId)">{{stateId}}</button>
+    </div>
+
+    <br>
+    <div ng-repeat="alarmWord in alarmWords">
+        <br>
+        <table>
+            <caption>{{alarmWord.name.toUpperCase()}}</caption>
+            <tbody>
+            <tr ng-repeat="alarm in alarmWord.array | filter:greaterThan('value', 0)">
+                <td>{{alarm.pId + ' - ' + alarm.id}}</td>
+                <td style="text-align: center; min-width: 150px">{{alarm.value}}</td>
+                <td style="text-align: center">{{(alarm.hasFaultCodes)? '-' : dec2Bin16(alarm.value)}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!--<div>-->
+        <!--<table>-->
+            <!--<caption>WARNINGS</caption>-->
+            <!--<tbody>-->
+            <!--<tr ng-repeat="warning in warnWords | filter:greaterThan('value', 0)">-->
+                <!--<td>{{warning.pId + ' - ' + warning.id}}</td>-->
+                <!--<td style="text-align: center; min-width: 150px">{{warning.value}}</td>-->
+                <!--<td style="text-align: center">{{(warning.hasFaultCodes)? '-' : dec2Bin16(warning.value)}}</td>-->
+            <!--</tr>-->
+            <!--</tbody>-->
+        <!--</table>-->
+    <!--</div>-->
+    <br>
+    <div>
+        <table>
+            <caption>PARAMETERS</caption>
+            <tbody>
+            <tr ng-repeat="param in parameters">
+                <td>{{param.pId + ' - ' + param.id}}</td>
+                <td style="text-align: center; min-width: 150px">{{param.value}}</td>
+                <td style="text-align: center">{{(param.hasFaultCodes)? '-' : dec2Bin16(param.value)}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <br>
+    <hr>
+    <div>
+        <span>Set states changing </span>
+        <button ng-click="setFaster(!status.isFast)">{{(status.isFast)? 'SLOWER' : 'FASTER'}}</button>
+        <span class="space-left">next state {{fromNow(nextStateOn)}}</span>
+    </div>
+    <br>
+    <div>
+        <spna>Set drive:</spna>
+        <button class="space-left" ng-repeat="type in driveTypes" ng-click="setDriveType(type)">{{type}}</button>
+    </div>
+
+
+</div>
+
+<script src="/public/libs/angular.min.js"></script>
+<script src="/public/script.js"></script>
+</body>
+</html>

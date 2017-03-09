@@ -16,8 +16,8 @@ let isFast = false;
 const driveState = new utils.DriveState();
 let state = driveState.STOPPED; // 0 stopped; 1 running; 2 warning; 3 faulted
 let minuteCount = 0,
-    changeState_min = 5, // 5 minute
-    nextState = Date.now() + changeState_min * 60 * 1000; // initial change state in 5 minutes
+    changeState_min = 5; // 5 minute
+let stateChangeTimestamp = new Date().getTime();
 
 // state changes randomly within the low limit (LL) and high limit (HL) period
 const RANDOM_STATE_CHANGE_LL_min = 12 * 60;
@@ -28,7 +28,7 @@ utils.startPeriodicTasks(everySecond, everyMinute, null);
 function everySecond(){
     if (!drive) return;
     
-    if (isFast) checkForStateChange();
+    if (isFast && drive) checkForStateChange();
     if (state === driveState.RUNNING || state === driveState.WARNING){
         drive.updateValues(true);
     }else{
@@ -44,7 +44,7 @@ function checkForStateChange(){
     if (minuteCount >= changeState_min){
         minuteCount = 0;
         changeState_min = utils.getRandomInt(RANDOM_STATE_CHANGE_LL_min, RANDOM_STATE_CHANGE_HL_min);
-        nextState = Date.now() + changeState_min * 60 * 1000;
+        stateChangeTimestamp = new Date().getTime();
 
         logger.info('Next change state will occur in ' + changeState_min + ((isFast)? ' seconds' : ' minutes'), 'everySecond');
 
@@ -99,6 +99,7 @@ function getValue(modbusAddress){
 function setDrive(driveObject){
     parSaver.listParams(driveObject.type, function(initParams){
         drive = new Drive(driveObject, initParams);
+        state = driveState.STOPPED;
     });
 }
 
@@ -116,9 +117,11 @@ function _getStatus(){
     return {
         type: drive.type,
         state: driveState.getString(state),
-        nextState: new Date(nextState),
+        nextState: stateChangeTimestamp + (changeState_min * 1000 * ((isFast)? 1 : 60)),
+        stateChangedOn: stateChangeTimestamp,
         next_min: changeState_min - minuteCount,
-        params: drive.parameters
+        params: drive.parameters,
+        isFast: isFast
     }
 }
 function _listDriveTypes(){
@@ -192,7 +195,6 @@ function _setState(_stateId){
 
     minuteCount = 0;
     changeState_min = utils.getRandomInt(RANDOM_STATE_CHANGE_LL_min, RANDOM_STATE_CHANGE_HL_min);
-    nextState = Date.now() + changeState_min * 60 * 1000;
 
     return true;
 }

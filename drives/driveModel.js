@@ -129,6 +129,7 @@ function Drive(driveObject, additionalParams){
         msw.value = bit.set(msw.value, 2); // RUN bit in STATUS WORD - as in this simulation it WARNs when drive's running
         msw.value = bit.set(msw.value, 7); // WARNING bit in STATUS WORD
 
+        _clearAllFaults();
         const word = _getRandomWord(warnWords);
         if (word.hasFaultCodes) return _setRandomValueToWord(word);
         _setRandomBitToWord(word);

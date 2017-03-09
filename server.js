@@ -4,6 +4,8 @@ const restify = require('restify');
 const utils = require('./utils/utils');
 const modbusServer = require('./mServer.js');
 const version = require('./package.json').version;
+const fs = require('fs');
+const path = require('path');
 
 const DEBUG = (process.env.DEV === '1');
 logger.setDebug(DEBUG);
@@ -47,6 +49,7 @@ const APIs = {
 
 /**
  * APIs:
+ * /GET/apis
  * /GET/status
  * /SET/drive/:driveType  - acs800, vacon_nx
  * 
@@ -54,8 +57,44 @@ const APIs = {
  * /SET/debug/logger
  */
 const server = restify.createServer({name:initDriveType || 'Drive Simulator'});
+const indexPath = path.join(__dirname + '/public/index.html');
+
 
 server.get('/', function getStatus(req, res, next) {
+    const headers = {['content-type']: 'text/html'};
+    fs.readFile(indexPath, 'utf8', (err, file) => {
+        if (err) return res.send(200, 'Oops, something went wrong... [' + err + ']', headers);
+        res.header('content-type', 'text/html');
+        res.write(file);
+        res.end();
+    });
+    // next();
+});
+
+server.get('/public/libs/angular.min.js', function getStatus(req, res, next) {
+    const headers = {['content-type']: 'text/html'};
+    fs.readFile('./public/libs/angular.min.js', 'utf8', (err, file) => {
+        if (err) return res.send(200, 'Oops, something went wrong... [' + err + ']', headers);
+        res.write(file);
+        res.end();
+    });
+    next();
+});
+server.get('/public/script.js', function getStatus(req, res, next) {
+    const headers = {['content-type']: 'text/html'};
+    fs.readFile('./public/script.js', 'utf8', (err, file) => {
+        if (err) return res.send(200, 'Oops, something went wrong... [' + err + ']', headers);
+        res.write(file);
+        res.end();
+    });
+    next();
+});
+
+
+
+
+
+server.get('/GET/apis', function getStatus(req, res, next) {
     res.send(APIs);
     next();
 });
@@ -125,12 +164,4 @@ server.get(APIs.setState.url, function setParValue(req, res, next) {
 
 server.listen(httpPort, hostIpAddress, function() {
   console.log('%s listening HTTP at %s', server.name, server.url);
-});
-
-server.use(function(req, res, next){
-    // res.setHeader('content-type','application/json');
-    //   OR
-    res.setHeaders({['content-type']:'application/json'});
-
-    next();
 });
