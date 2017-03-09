@@ -28,9 +28,6 @@ function Drive(driveObject, additionalParams){
         out_v = getParam('out_v'),
         d_temp = getParam('d_temp');
 
-    let wWord = getParam('w_word_1'),
-        fWord = getParam('f_word_1');
-
     // ------------------------------------ PRIVATE ------------------------------------
     function getParam(id){
         for (let i = 0; i < parameters.length; i++){
@@ -51,17 +48,6 @@ function Drive(driveObject, additionalParams){
     }
 
     /**
-     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, bits:[]}} word
-     * @returns {number}
-     * @private
-     */
-    function _getRandomBit(word) {
-        const bitIndex = utils.getRandomInt(0,word.bits.length - 1);
-        logger.info(bitIndex + ' ' + bit, 'getRandomBit');
-        return word.bits[bitIndex];
-    }
-
-    /**
      * @param {[]} words
      * @returns {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, bits:[], fCodes: string}}
      * @private
@@ -73,18 +59,44 @@ function Drive(driveObject, additionalParams){
     }
 
     /**
-     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, fCodes: string}} word
-     * @return {number}
+     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, bits:[]}} word
+     * @returns {number}
      * @private
      */
-    function _getRandomFaultValue(word) {
+    function _setRandomBitToWord(word) {
+        const bitIndex = utils.getRandomInt(0,word.bits.length - 1);
+        logger.info(bitIndex + ' ' + bit, 'getRandomBit');
+        const randomBit =  word.bits[bitIndex];
+        word.value = bit.set(word.value, randomBit);
+        return word.value
+    }
+    /**
+     * @param {{pId: number, id:string, value:number,  fWord:boolean, hasFaultCodes:boolean, fCodes: string}} word
+     * @return {number} the random value
+     * @private
+     */
+    function _setRandomValueToWord(word) {
         const faultCodes = driveObject[word.fCodes];
         const faultCodeIndex = utils.getRandomInt(0,faultCodes.length - 1);
-        return faultCodes[faultCodeIndex].value
+        word.value = faultCodes[faultCodeIndex].value;
+        return word.value
+    }
+
+    function _clearAllFaultsAndWarnings() {
+        _clearAllFaults();
+        _clearAllWarning();
+    }
+
+    function _clearAllFaults() {
+        faultWords.forEach((faultWord) => {faultWord.value = 0});
+    }
+
+    function _clearAllWarning() {
+        warnWords.forEach((warnWord) => {warnWord.value = 0});
     }
 
     // ------------------------------------ PUBLIC ------------------------------------
-    function _updateValues(isRunning){
+    function updateValues(isRunning){
 
         const state = (isRunning) ? 'run' : 'stop';
         if (isRunning){
@@ -106,41 +118,33 @@ function Drive(driveObject, additionalParams){
         }
     }
 
-    function _setRun(){
+    function setRun(){
         msw.value = nom.msw.value.stop;
         msw.value = bit.set(msw.value, 2); // RUN bit in STATUS WORD
 
-        wWord.value = 0;
-        fWord.value = 0;
+        _clearAllFaultsAndWarnings();
     }
-    function _setWarning(){
+    function setWarning(){
         msw.value = nom.msw.value.stop;
         msw.value = bit.set(msw.value, 2); // RUN bit in STATUS WORD - as in this simulation it WARNs when drive's running
         msw.value = bit.set(msw.value, 7); // WARNING bit in STATUS WORD
 
-        const word = getRandomBit(warnWords);
-        wWord = getParam(word.id);
-        wWord.value = bit.set(wWord.value, word.bit);
+        const word = _getRandomWord(warnWords);
+        if (word.hasFaultCodes) return _setRandomValueToWord(word);
+        _setRandomBitToWord(word);
     }
-    function _setFault(){
+    function setFault(){
         msw.value = nom.msw.value.stop;
         msw.value = bit.set(msw.value, 3); // FAULT bit in STATUS WORD
 
-        // const word = getRandomBit(faultWords);
         const word = _getRandomWord(faultWords);
-        if (word.hasFaultCodes) {
-            fWord.value = _getRandomFaultValue(word);
-        } else {
-            const randomBit = _getRandomBit(word);
-            fWord = getParam(word.id);
-            fWord.value = bit.set(fWord.value, randomBit);
-        }
+        if (word.hasFaultCodes) return _setRandomValueToWord(word);
+        _setRandomBitToWord(word);
     }
-    function _setStop(){
+    function setStop(){
         msw.value = nom.msw.value.stop;
 
-        wWord.value = 0;
-        fWord.value = 0;
+        _clearAllFaultsAndWarnings();
     }
 
     /**
@@ -149,7 +153,7 @@ function Drive(driveObject, additionalParams){
      * @returns {Array}
      * @private
      */
-    function _setDriveParameter(paramId, value){
+    function setDriveParameter(paramId, value){
         let isPresent = false;
         const addParams = [];
         for (let i = 0; i < parameters.length; i++){
@@ -178,12 +182,12 @@ function Drive(driveObject, additionalParams){
         modbusOffset: driveObject.modbusOffset || 0,
 
         //setter
-        updateValues : _updateValues,
-        setRun: _setRun,
-        setWarning: _setWarning,
-        setFault: _setFault,
-        setStop: _setStop,
-        setDriveParameter: _setDriveParameter
+        updateValues : updateValues,
+        setRun: setRun,
+        setWarning: setWarning,
+        setFault: setFault,
+        setStop: setStop,
+        setDriveParameter: setDriveParameter
     };
 }
 
