@@ -1,28 +1,21 @@
+var $DEBUG = false;
 (function () {
     var app = angular.module('simulationApp', []);
     app.controller('GeneralCtrl',['$scope', '$http', function (sim, $http) {
         var interval = setInterval(getStatus, 10000);
 
-        sim.driveStates = ['RUNNING', 'STOPPED', 'WARNING', 'FAULTED'];
-        sim.driveTypes = ['acs800', 'vacon_nx', 'atv320'];
-
-        getStatus();
-
-        sim.setDriveState = function(stateId) {
-            $http.get('/SET/state/' + stateId).then(function(response) {
-                if (response.status !== 200) console.error(response.status);
-                // response.data = {"done":true,"newState":"STOPPED"}
+        function init() {
+            $http.get('/GET/apis').then(function successCallback(response) {
+                if ($DEBUG) console.log(response.data);
+                sim.driveTypes = response.data.setDriveType.params;
+                sim.driveStates = response.data.setState.params;
                 getStatus();
-            });
-        };
-
-        sim.refreshStatus = function () {
-            getStatus();
-        };
+            }, handleHttpError);
+        }
 
         function getStatus() {
             $http.get('/GET/status').then(function(response) {
-                if (response.status !== 200) return console.error(response.status);
+                if ($DEBUG) console.log(response.data);
                 sim.status = response.data;
                 sim.title = 'Drive ' + sim.status.type;
 
@@ -36,37 +29,11 @@
 
                 sim.alarmWords = [{name:'Faults', array:faultWords}, {name:'Warnings', array:warnWords}];
 
-            });
+            }, handleHttpError);
         }
 
-        sim.setDriveType = function (driveType) {
-            $http.get('/SET/drive/' + driveType).then(function(response) {
-                if (response.status !== 200) console.error(response.status);
-                console.log(JSON.stringify(response.data));
-                getStatus();
-            });
-        };
-
-        sim.setFaster = function(isFaster){
-            $http.get('/SET/faster/' + ((isFaster)? 'true': 'false')).then(function(response) {
-                if (response.status !== 200) console.error(response.status);
-                console.log(JSON.stringify(response.data));
-                getStatus();
-            });
-        };
-
-        sim.setParamValue = function(paramId, value) {
-            var _paramId = parseInt(paramId);
-            var _value = parseInt(value);
-            if (_paramId >= 0 && _value >= 0) {
-                $http.get('/SET/param/' + _paramId + '/' + _value).then(function(response) {
-                    if (response.status !== 200) console.error(response.status);
-                    console.log(JSON.stringify(response.data));
-                    getStatus();
-                });
-            } else {
-                console.error('Must be an Integer number > 0');
-            }
+        sim.refreshStatus = function () {
+            getStatus();
         };
 
         sim.dec2Bin16 = function(dec){
@@ -88,7 +55,6 @@
         };
 
         function fromNow(date) {
-
             if (!date) return completeFormatting(true, 0, 'seconds');
 
             var delta = Date.now() - date.getTime();
@@ -115,5 +81,46 @@
                 return ((!isAgo)? 'in ':'' ) + number + ' ' + units + ((isAgo)? ' ago':'');
             }
         }
+
+
+
+        sim.setDriveType = function (driveType) {
+            $http.get('/SET/drive/' + driveType).then(function successCallback(response) {
+                if ($DEBUG) console.log(response.data);
+                getStatus();
+            }, handleHttpError);
+        };
+
+        sim.setFaster = function(isFaster){
+            $http.get('/SET/faster/' + ((isFaster)? 'true': 'false')).then(function(response) {
+                if ($DEBUG) console.log(response.data);
+                getStatus();
+            }, handleHttpError);
+        };
+
+        sim.setParamValue = function(paramId, value) {
+            var _paramId = parseInt(paramId);
+            var _value = parseInt(value);
+            if (_paramId >= 0 && _value >= 0) {
+                $http.get('/SET/param/' + _paramId + '/' + _value).then(function(response) {
+                    if ($DEBUG) console.log(response.data);
+                    getStatus();
+                }, handleHttpError);
+            } else {
+                console.error('Must be an Integer number > 0');
+            }
+        };
+        sim.setDriveState = function(stateId) {
+            $http.get('/SET/state/' + stateId).then(function(response) {
+                if ($DEBUG) console.log(response.data);
+                getStatus();
+            }, handleHttpError);
+        };
+
+        function handleHttpError(err) {
+            if ($DEBUG) console.error(err.status, err.statusText);
+        }
+
+        init();
     }])
 })();
