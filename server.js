@@ -118,8 +118,10 @@ server.get(APIs.setState.url, function setParValue(req, res, next) {
     next();
 });
 
+// const wwwroot = path.resolve('wwwroot');
+
 server.get(/\/?.*/, restify.serveStatic({
-    directory: './public',
+    directory: path.resolve('wwwroot', './public'),
     default: 'index.html'
 }));
 
