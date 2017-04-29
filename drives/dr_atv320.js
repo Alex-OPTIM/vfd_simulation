@@ -36,5 +36,5 @@ module.exports = {
         out_v: {value: {run:  360    * 1, stop: 0}, range: 3},
         d_temp: {value: {run: 39.4  * 1, stop: 260}, range: 4}
     },
-    modbusOffset: 1
+    modbusOffset: 0
 };
